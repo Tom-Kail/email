@@ -50,9 +50,11 @@ func (m *Message) Attach(fileName *string) error {
 	if !exists {
 		return errors.New("Path not exist!")
 	}
+
 	if len(m.Files) > 1 {
 		return errors.New("Now only support one attachment!")
 	}
+
 	m.Files = append(m.Files, &File{fileName: *fileName, alterName: *fileName})
 	return nil
 }
