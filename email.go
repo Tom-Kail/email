@@ -41,7 +41,7 @@ func IsPathExists(fileName *string) (bool, error) {
 	return false, err
 }
 
-func (m Message) Attach(fileName *string) error {
+func (m *Message) Attach(fileName *string) error {
 	exists, err := IsPathExists(fileName)
 	if err != nil {
 		return err
