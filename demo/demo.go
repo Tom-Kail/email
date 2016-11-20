@@ -9,15 +9,15 @@ import (
 )
 
 const (
-	Addr     = "smtp.xx.com"
+	Addr     = "smtp.126.com"
 	Host     = Addr + ":25"
-	AuthName = "youmail@xx.com"
-	AuthPwd  = "youpasword"
+	AuthName = "cccbackup@126.com"
+	AuthPwd  = "ndasec123"
 )
 
 func main() {
 	// gen attach
-	fileName := "文件"
+	fileName := "暴走大事件"
 	f, err := os.Create(fileName)
 	defer os.Remove(f.Name())
 	defer f.Close()
