@@ -27,7 +27,7 @@ func main() {
 
 	f.WriteString("实践出真知")
 	m := email.NewMessage()
-	m.Attach(&fileName)
+	m.Attach(fileName)
 	//	m.Attach(&fileName)
 	auth := smtp.PlainAuth(m.Sender, AuthName, AuthPwd, Addr)
 	// send email
