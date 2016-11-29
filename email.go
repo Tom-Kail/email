@@ -28,8 +28,8 @@ type File struct {
 	alterName string
 }
 
-func IsPathExists(fileName *string) (bool, error) {
-	_, err := os.Stat(*fileName)
+func IsPathExists(fileName string) (bool, error) {
+	_, err := os.Stat(fileName)
 	if err == nil {
 		return true, nil
 	}
@@ -41,7 +41,7 @@ func IsPathExists(fileName *string) (bool, error) {
 	return false, err
 }
 
-func (m *Message) Attach(fileName *string) error {
+func (m *Message) Attach(fileName string) error {
 	exists, err := IsPathExists(fileName)
 	if err != nil {
 		return err
@@ -51,11 +51,11 @@ func (m *Message) Attach(fileName *string) error {
 		return errors.New("Path not exist!")
 	}
 
-	if len(m.Files) > 1 {
-		return errors.New("Now only support one attachment!")
-	}
+	//	if len(m.Files) > 1 {
+	//		return errors.New("Now only support one attachment!")
+	//	}
 
-	m.Files = append(m.Files, &File{fileName: *fileName, alterName: *fileName})
+	m.Files = append(m.Files, &File{fileName: fileName, alterName: fileName})
 	return nil
 }
 
@@ -74,14 +74,14 @@ func NewMessage() *Message {
 
 // mail headers
 func (m *Message) Head() []byte {
-	return []byte(fmt.Sprintf("From: %s <%s>\r\nTo: %s <%s>\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed;\r\n boundary=%s\r\n\r\n--%s",
-		m.SenderName, m.Sender, m.ToName[0], m.To[0], m.Subject, m.Marker, m.Marker))
+	return []byte(fmt.Sprintf("From: %s <%s>\r\nTo: %s <%s>\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed;\r\n boundary=%s\r\n\r\n",
+		m.SenderName, m.Sender, m.ToName[0], m.To[0], m.Subject, m.Marker))
 }
 
 // body (text or HTML)
 func (m *Message) Bodys() []byte {
-	return []byte(fmt.Sprintf("\r\nContent-Type: text/html\r\nContent-Transfer-Encoding:8bit\r\n\r\n%s\r\n--%s",
-		m.Body, m.Marker))
+	return []byte(fmt.Sprintf("\r\nContent-Type: text/html\r\nContent-Transfer-Encoding:8bit\r\n\r\n%s\r\n",
+		m.Body))
 }
 
 func (m *Message) Encode(fileName *string) ([]byte, error) {
@@ -105,14 +105,13 @@ func (m *Message) Encode(fileName *string) ([]byte, error) {
 	// append last line in buffer
 	buf.WriteString(encoded[nbrLines*lineMaxLength:])
 	var rst string
-	rst += "\r\n"
+	rst += "--%s\r\n"
 	rst += "Content-Type: application/octet-stream;charset=utf-8; name=\"%s\"\r\n"
 	rst += "Content-Transfer-Encoding: base64\r\n"
 	rst += "Content-Disposition: attachment; charset=utf-8; filename=\"%s\"\r\n"
 	rst += "\r\n%s\r\n"
-	rst += "--%s--"
 
-	return []byte(fmt.Sprintf(rst, name, name, buf.String(), m.Marker)), nil
+	return []byte(fmt.Sprintf(rst, m.Marker, name, name, buf.String())), nil
 }
 
 func (m *Message) ToBytes() ([]byte, error) {
@@ -127,7 +126,8 @@ func (m *Message) ToBytes() ([]byte, error) {
 
 		encodeBytes = append(encodeBytes, bytes...)
 	}
-
+	ending := fmt.Sprintf("--%s--", m.Marker)
+	encodeBytes = append(encodeBytes, []byte(ending)...)
 	return encodeBytes, nil
 }
 
